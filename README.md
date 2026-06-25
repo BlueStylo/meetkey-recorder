@@ -2,51 +2,150 @@
 
 ![라즈베리파이 터치스크린에서 실행 중인 MeetKey Recorder](assets/meetkey-device.jpg)
 
-MeetKey Recorder는 라즈베리파이, 5인치 터치스크린, USB 컨퍼런스 마이크를 이용해 만든 **회의 녹음/전사/요약 PoC**입니다. 회의실에 놓고 버튼 하나로 녹음을 시작한 뒤, 저장하면 휴대폰에서 QR로 접속해 원본 음성, 전사문, 요약문을 확인하고 다운로드할 수 있는 흐름을 목표로 합니다.
+**MeetKey Recorder**는 라즈베리파이와 USB 컨퍼런스 마이크로 만든 회의 녹음/전사/요약 PoC입니다. 회의실에 놓인 작은 장치에서 녹음을 시작하고, 회의가 끝나면 휴대폰으로 QR을 스캔해 원본 음성, 전사문, 요약문을 바로 확인하는 흐름을 구현했습니다.
 
-이 저장소에는 라즈베리파이에서 동작하는 녹음 장치 UI, 휴대폰 확인용 로컬 웹페이지, Whisper 전사와 Gemma/Ollama 요약을 수행하는 처리 서버 코드가 함께 들어 있습니다.
+이 프로젝트의 핵심은 단순히 “녹음 파일을 서버로 보내는 앱”이 아니라, **라즈베리파이가 회의 기록의 소유자가 되고 AI 서버는 임시 처리 작업만 수행하는 구조**입니다. 원본 데이터는 장치에 남기고, 처리 서버는 Whisper 전사와 Gemma/Ollama 요약을 수행한 뒤 결과만 반환합니다.
 
-## 핵심 기능
+## 프로젝트 요약
 
-- 라즈베리파이 터치스크린에서 전체 화면 키오스크 UI로 실행
-- Anker PowerConf USB 컨퍼런스 마이크를 이용한 WAV 녹음
-- 녹음 시작, 일시정지, 재개, 저장, 취소 흐름 지원
-- 녹음 중 마이크 입력 레벨 시각화
-- 원본 음성 파일을 라즈베리파이에 로컬 저장
-- 긴 회의를 10분 단위 구간으로 나누고 일부 오버랩을 둔 뒤 순차 처리
-- 임시 오디오 구간만 처리 서버로 전송해 Whisper 전사와 Gemma 요약 수행
-- 휴대폰에서 QR로 접속하는 회의 기록/현재 회의 페이지 제공
-- Markdown 기반 전사문/요약문 렌더링
-- 원본 음성, 전사문, 요약문 다운로드 지원
-- 처리 서버는 AI 작업자 역할만 수행하고 최종 기록은 라즈베리파이가 소유
+| 항목 | 내용 |
+| --- | --- |
+| 목표 | 회의실에서 바로 쓸 수 있는 독립형 AI 회의 녹음 장치 PoC |
+| 입력 | Anker PowerConf USB 컨퍼런스 마이크 |
+| 장치 | Raspberry Pi 4 + 5인치 터치스크린 |
+| 접속 방식 | 라즈베리파이 핫스팟 + QR 기반 휴대폰 접속 |
+| 처리 방식 | 10분 단위 오디오 구간 전송, Whisper 전사, Gemma/Ollama 요약 |
+| 저장 정책 | 원본 음성, 전사문, 요약문은 라즈베리파이에 로컬 저장 |
+| 현재 상태 | 실제 녹음, 저장, 전사, 요약, 다운로드까지 end-to-end 검증 완료 |
 
-## 사용 장비
+## 왜 만들었나
 
-- Raspberry Pi 4
-- 5인치 터치스크린
-- Anker PowerConf A3301 USB 컨퍼런스 마이크
-- USB Wi-Fi 동글
-- 라즈베리파이 내장 Wi-Fi 핫스팟
+일반적인 회의 녹음 앱은 휴대폰이나 클라우드 서비스에 의존합니다. 하지만 회의실 공용 장비로 쓰려면 다음 문제가 생깁니다.
 
-## 시스템 구조
+- 회의마다 누가 녹음 앱을 켤지 정해야 함
+- 녹음 파일과 회의록이 개인 기기에 흩어짐
+- 회의 직후 결과 확인까지 흐름이 끊김
+- 회사 내부망이나 보안 정책 때문에 외부 클라우드 사용이 부담됨
+- 긴 회의는 전사/요약 완료까지 시간이 오래 걸리는 것처럼 느껴짐
 
-```text
-라즈베리파이 터치스크린
-  -> 녹음 장치 UI 실행
-  -> 원본 WAV와 최종 회의 기록 저장
-  -> 휴대폰용 웹페이지와 QR 제공
+MeetKey는 이 문제를 **회의실에 놓는 작은 전용 장치**로 풀어보는 실험입니다. 장치 화면에는 꼭 필요한 버튼만 두고, 자세한 회의 결과는 휴대폰에서 확인하도록 UX를 나눴습니다.
 
-휴대폰
-  -> MeetKey 핫스팟 접속
-  -> QR로 기록/현재 회의 페이지 열기
-  -> 전사문, 요약문, 원본 음성 확인 및 다운로드
+## 사용자 흐름
 
-처리 서버
-  -> 임시 오디오 구간 수신
-  -> Whisper STT 실행
-  -> Gemma/Ollama 요약 실행
-  -> 전사/요약 결과를 JSON으로 반환
+```mermaid
+flowchart LR
+    A["장치에서 녹음 시작"] --> B["회의 녹음"]
+    B --> C{"회의 중 상태"}
+    C -->|"일시정지"| D["빨간 테두리와 재개/저장/취소"]
+    C -->|"계속 녹음"| E["마이크 입력 레벨 표시"]
+    D -->|"재개"| B
+    D -->|"취소"| F["저장하지 않고 삭제"]
+    B -->|"저장"| G["라즈베리파이에 WAV 저장"]
+    G --> H["오디오 구간 처리 시작"]
+    H --> I["QR로 휴대폰 접속"]
+    I --> J["전사문/요약문/원본 음성 확인"]
+    J --> K["저장 또는 삭제"]
 ```
+
+## 시스템 아키텍처
+
+```mermaid
+flowchart TB
+    subgraph Device["Raspberry Pi Recorder"]
+        UI["터치스크린 키오스크 UI"]
+        REC["arecord 기반 WAV 녹음"]
+        STORE["로컬 회의 기록 저장소"]
+        WEB["휴대폰용 로컬 웹서버"]
+        AP["MeetKey 핫스팟"]
+    end
+
+    subgraph Phone["Phone"]
+        QR1["장비 연결 QR"]
+        QR2["접속 링크 QR"]
+        VIEW["회의록 확인 페이지"]
+    end
+
+    subgraph Server["Processing Server"]
+        API["MeetKey API"]
+        STT["Whisper / WhisperX STT"]
+        LLM["Gemma + Ollama 요약"]
+        CLEAN["임시 처리 파일 정리"]
+    end
+
+    UI --> REC
+    REC --> STORE
+    STORE --> WEB
+    AP --> QR1
+    QR1 --> QR2
+    QR2 --> VIEW
+    VIEW --> WEB
+    STORE -->|"임시 chunk WAV"| API
+    API --> STT
+    STT --> LLM
+    LLM -->|"transcript + summary"| STORE
+    API --> CLEAN
+```
+
+## 구간 처리 파이프라인
+
+긴 회의는 한 번에 처리하면 사용자가 오래 기다리는 느낌을 받습니다. 그래서 녹음 중 일정 길이마다 구간을 만들고, 짧은 오버랩을 둔 뒤 먼저 처리할 수 있게 설계했습니다.
+
+```mermaid
+sequenceDiagram
+    participant Pi as Raspberry Pi
+    participant Server as Processing Server
+    participant Whisper as Whisper STT
+    participant Gemma as Gemma/Ollama
+    participant Phone as Phone UI
+
+    Pi->>Pi: 10분 단위 chunk 생성
+    Pi->>Server: chunk WAV 임시 업로드
+    Server->>Whisper: 한국어 전사 요청
+    Whisper-->>Server: 시간 포함 전사문
+    Server->>Gemma: 구간 요약 요청
+    Gemma-->>Server: 구간 요약
+    Server-->>Pi: transcript + summary JSON
+    Pi->>Pi: 구간 결과 로컬 저장
+    Pi-->>Phone: 진행 상태 갱신
+    Pi->>Pi: 전체 전사/요약 병합
+```
+
+## 주요 구현 포인트
+
+| 영역 | 구현 내용 |
+| --- | --- |
+| 장치 UI | 녹음 시작, 일시정지, 저장, 취소, 상태별 테두리 색상, 마이크 레벨 표시 |
+| 휴대폰 UX | 장비 연결 QR과 접속 링크 QR을 분리해 iOS/Android 캡티브 포털 차이를 우회 |
+| 저장 구조 | 원본 WAV와 최종 회의 결과를 라즈베리파이 세션 폴더에 저장 |
+| 긴 회의 처리 | 10분 chunk와 overlap 기반 처리로 긴 회의의 대기감을 줄이는 구조 |
+| 서버 역할 | AI 처리를 위한 임시 작업자 역할만 수행하고 최종 기록은 장치에 반환 |
+| 결과 페이지 | Markdown 렌더링, 표 표시, 원본 음성/전사문/요약문 다운로드 |
+| 운영 안정성 | systemd 서비스, Chromium kiosk, 핫스팟/AP 모드, 캡티브 포털 보조 |
+
+## 기술 스택
+
+| 구분 | 기술 |
+| --- | --- |
+| Device runtime | Python, http.server, ALSA arecord |
+| Device UI | HTML, CSS, Vanilla JavaScript, Chromium kiosk |
+| Network | Raspberry Pi hotspot, captive portal helper, QR flow |
+| Processing API | Python HTTP server |
+| STT | Whisper, WhisperX/faster-whisper 연동 구조 |
+| Summary | Ollama, Gemma 31B Q8 128K 설정 검증 |
+| Deployment | systemd, shell scripts, labwc autostart |
+
+## 현재 검증한 것
+
+| 테스트 | 결과 |
+| --- | --- |
+| 라즈베리파이 화면 키오스크 실행 | 정상 |
+| Anker PowerConf 마이크 인식 | 정상 |
+| 실제 38초 녹음 저장 | WAV 생성 및 음성 레벨 확인 |
+| Whisper 전사 | 시간 포함 전사문 생성 |
+| Gemma 요약 | 회의 개요, 핵심 논의, 액션 아이템 생성 |
+| 휴대폰 QR 접속 | 로컬 기록 페이지 접속 확인 |
+| 파일 다운로드 | 원본 음성, 전사문, 요약문 다운로드 지원 |
+| GitHub 관리 | 민감 설정과 녹음 파일 제외 후 private repo 관리 |
 
 ## 폴더 구조
 
@@ -123,21 +222,7 @@ MEETKEY_STT_MODE=mock MEETKEY_SUMMARY_MODE=mock python3 app.py
 
 실제 Wi-Fi 비밀번호, 서버 주소, 녹음 파일, 전사/요약 결과, 로컬 배포 설정은 커밋하지 않는 것을 원칙으로 합니다.
 
-## 현재 구현 상태
-
-현재 end-to-end로 동작하는 항목:
-
-- 라즈베리파이 녹음 플로우
-- 원본 WAV 로컬 저장
-- 일시정지, 재개, 취소, 저장
-- 휴대폰 QR 접속
-- 녹음 기록 목록과 선택한 기록 QR 표시
-- Markdown 기반 전사/요약 페이지
-- 10분 단위 구간 전사/요약 처리
-- 원본 음성/전사문/요약문 다운로드
-- 처리 서버 연동
-
-앞으로 개선할 항목:
+## 앞으로 개선할 항목
 
 - 실패한 구간 처리 재시도 큐
 - 저장/삭제 등 기록 생명주기 UX 강화
