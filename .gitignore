@@ -20,6 +20,10 @@ config.json
 *.jpg
 *.jpeg
 
+# README assets are intentionally committed.
+!assets/
+!assets/**
+
 # Logs and browser automation traces
 .playwright-cli/
 *.log
