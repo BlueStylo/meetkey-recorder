@@ -1,0 +1,14 @@
+{
+  "host": "0.0.0.0",
+  "port": 8080,
+  "base_path": "/meetkey",
+  "data_dir": "/home/gunwoo/MeetKey_Server",
+  "ollama_url": "http://127.0.0.1:11434",
+  "ollama_model": "gemma4:31b",
+  "stt_mode": "auto",
+  "summary_mode": "ollama",
+  "transcribe_command": "",
+  "whisper_model": "large-v3",
+  "whisper_device": "cuda",
+  "whisper_compute_type": "float16"
+}

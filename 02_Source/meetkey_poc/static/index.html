@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko" translate="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="google" content="notranslate" />
+    <title>MeetKey</title>
+    <link rel="stylesheet" href="/static/app.css?v=20260625-7" />
+  </head>
+  <body>
+    <div id="app" class="app-shell is-idle">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>MeetKey</span>
+        </div>
+        <button id="homeButton" class="home-button hidden" type="button">메인으로</button>
+      </header>
+
+      <main id="screen" class="screen" aria-live="polite"></main>
+
+      <footer class="mic-line">
+        <span id="micDot" class="mic-dot"></span>
+        <span id="micText">마이크 확인 중</span>
+      </footer>
+    </div>
+
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-panel">
+        <h2 id="modalTitle">알림</h2>
+        <p id="modalMessage"></p>
+        <div id="modalActions" class="modal-actions single">
+          <button id="modalCancel" class="modal-button secondary hidden" type="button">아니오</button>
+          <button id="modalClose" class="modal-button" type="button">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/app.js?v=20260625-7"></script>
+  </body>
+</html>

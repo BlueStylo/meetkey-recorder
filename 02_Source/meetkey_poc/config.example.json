@@ -1,0 +1,23 @@
+{
+  "host": "0.0.0.0",
+  "port": 8000,
+  "server_base_url": "http://YOUR_AI_SERVER:8080/meetkey",
+  "device_base_url": "http://10.42.0.1:8000",
+  "recordings_dir": "/home/pi/MeetKey_Recordings",
+  "mic_device": "plughw:CARD=PowerConf,DEV=0",
+  "mic_label": "Anker PowerConf",
+  "sample_rate": 16000,
+  "channels": 1,
+  "qr_timeout_seconds": 180,
+  "upload_timeout_seconds": 1800,
+  "chunk_processing_enabled": true,
+  "chunk_seconds": 600,
+  "chunk_overlap_seconds": 10,
+  "chunk_min_seconds": 3,
+  "chunk_upload_timeout_seconds": 3600,
+  "hotspot_ssid": "MeetKey",
+  "hotspot_password": "CHANGE_ME",
+  "hotspot_base_url": "http://10.42.0.1:8000",
+  "captive_base_url": "http://10.42.0.1",
+  "captive_target_file": "/home/pi/MeetKey_Recordings/captive_target.txt"
+}

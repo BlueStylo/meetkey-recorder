@@ -1,0 +1,3 @@
+# MeetKey kiosk startup
+systemctl --user start meetkey-server.service >/tmp/meetkey-systemd-start.log 2>&1 &
+/home/gunwoo/meetkey_poc/scripts/open_kiosk.sh >/tmp/meetkey-kiosk-start.log 2>&1 &

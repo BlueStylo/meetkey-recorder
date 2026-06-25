@@ -1,0 +1,12 @@
+[Unit]
+Description=MeetKey AP client isolation and captive portal guard
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/gunwoo/meetkey_poc/scripts/apply_ap_firewall.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

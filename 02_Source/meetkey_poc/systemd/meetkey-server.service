@@ -1,0 +1,17 @@
+[Unit]
+Description=MeetKey local recording server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gunwoo
+Group=gunwoo
+WorkingDirectory=/home/gunwoo/meetkey_poc
+ExecStart=/usr/bin/python3 /home/gunwoo/meetkey_poc/app.py
+Restart=always
+RestartSec=2
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

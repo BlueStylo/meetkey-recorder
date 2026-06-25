@@ -1,0 +1,36 @@
+.DS_Store
+
+# Local/runtime configuration
+config.json
+**/config.json
+*.local.json
+**/config.[0-9]*.json
+.env
+.env.*
+
+# Runtime data and generated media
+05_Recordings_Samples/
+99_Temp/
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.webm
+*.png
+*.jpg
+*.jpeg
+
+# Logs and browser automation traces
+.playwright-cli/
+*.log
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# OS/editor noise
+.idea/
+.vscode/
