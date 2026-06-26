@@ -48,6 +48,14 @@ flowchart LR
     J --> K["저장 또는 삭제"]
 ```
 
+회의가 끝나면 휴대폰으로 QR을 스캔해 아래 결과 페이지에서 요약, 전사문, 원본 음성을 확인합니다.
+
+<p align="center">
+  <img src="assets/meetkey-phone-result.jpg" alt="MeetKey 휴대폰 회의록 결과 페이지" width="300" />
+</p>
+
+> 실제 회의(약 1시간 6분)를 Whisper 전사와 gemma4:31b 요약으로 처리한 회의록 전체 예시: [06_Docs/sample_meeting_summary.md](06_Docs/sample_meeting_summary.md)
+
 ## 시스템 아키텍처
 
 ```mermaid
