@@ -1472,7 +1472,9 @@ class MeetKeyApp:
         if not value:
             return True
         generic_fragments = [
+            "제시해주신",
             "제시해주신 전사문",
+            "통합 재구성한 회의록",
             "정리한 회의록",
             "회의 요약",
             "핵심 요약",
@@ -1483,6 +1485,8 @@ class MeetKeyApp:
 
     def _clean_title(self, value: str) -> str:
         value = re.sub(r"\s+", " ", value).strip(" -:|")
+        value = re.sub(r"[*_`#>]+", "", value).strip(" -:|")
+        value = re.sub(r"^(회의\s*성격|핵심\s*주제|전체\s*결론)\s*[:：]\s*", "", value)
         value = re.sub(r"^본\s+회의는\s*", "", value)
         value = re.sub(r"에\s+대해\s+논의하였.*$", " 논의", value)
         if len(value) > 30:
