@@ -2,6 +2,8 @@ const app = document.getElementById("phoneApp");
 const isListPage = location.pathname === "/records";
 const sessionId = isListPage ? "" : decodeURIComponent(location.pathname.split("/").pop() || "");
 let activePanel = "summary";
+let currentPayload = null;
+let copyResetTimer = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -224,6 +226,7 @@ function renderList(items) {
 }
 
 function renderDetail(payload) {
+  currentPayload = payload;
   const record = payload.record || {};
   const chunks = Array.isArray(payload.chunks) ? payload.chunks : [];
   const readyChunks = chunks.filter(item => item.status === "ready").length;
@@ -287,7 +290,13 @@ function renderDetail(payload) {
               <h2>회의 요약</h2>
               <p>${escapeHtml(compactText(payload.summary).slice(0, 42))}</p>
             </div>
-            ${downloadButton("summary", "요약 저장", "TXT")}
+            <div class="section-actions">
+              <button class="small-download copy-button" type="button" data-copy="summary">
+                <span>요약 복사</span>
+                <small>복사</small>
+              </button>
+              ${downloadButton("summary", "요약 저장", "TXT")}
+            </div>
           </div>
           <div class="markdown summary-markdown">${markdownToHtml(payload.summary)}</div>
         </div>
@@ -372,6 +381,72 @@ function downloadUrl(kind) {
   return `/api/records/${encodeURIComponent(sessionId)}/download/${encodeURIComponent(kind)}`;
 }
 
+async function copyToClipboard(text) {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {
+      // Fall through to the textarea fallback for local HTTP/mobile browsers.
+    }
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "0";
+  textarea.style.left = "0";
+  textarea.style.width = "1px";
+  textarea.style.height = "1px";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } catch (_) {
+    copied = false;
+  }
+  textarea.remove();
+  return copied;
+}
+
+function setCopyButtonState(button, copied) {
+  const label = button.querySelector("span");
+  const meta = button.querySelector("small");
+  if (!button.dataset.label) button.dataset.label = label?.textContent || "요약 복사";
+  if (!button.dataset.meta) button.dataset.meta = meta?.textContent || "복사";
+
+  button.classList.toggle("copied", copied);
+  button.classList.toggle("failed", !copied);
+  if (label) label.textContent = copied ? "복사됨" : "복사 실패";
+  if (meta) meta.textContent = copied ? "완료" : "다시";
+
+  clearTimeout(copyResetTimer);
+  copyResetTimer = setTimeout(() => {
+    button.classList.remove("copied", "failed");
+    if (label) label.textContent = button.dataset.label;
+    if (meta) meta.textContent = button.dataset.meta;
+  }, 1600);
+}
+
+async function copySummary(button) {
+  const summary = String(currentPayload?.summary || "").trim();
+  if (!summary) {
+    setCopyButtonState(button, false);
+    return;
+  }
+
+  button.disabled = true;
+  const copied = await copyToClipboard(summary);
+  button.disabled = false;
+  setCopyButtonState(button, copied);
+}
+
 async function loadList() {
   const response = await fetch("/api/records", { cache: "no-store" });
   const items = await response.json();
@@ -407,6 +482,12 @@ async function act(action) {
 }
 
 app.addEventListener("click", (event) => {
+  const copyButton = event.target.closest("[data-copy]");
+  if (copyButton && !copyButton.disabled) {
+    if (copyButton.dataset.copy === "summary") copySummary(copyButton);
+    return;
+  }
+
   const tab = event.target.closest("[data-panel]");
   if (tab) {
     activePanel = tab.dataset.panel;

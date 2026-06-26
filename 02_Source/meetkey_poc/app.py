@@ -52,7 +52,7 @@ DEFAULT_CONFIG = {
 }
 
 
-STATIC_VERSION = "20260626-1"
+STATIC_VERSION = "20260626-2"
 
 
 def load_config() -> dict:
