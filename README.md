@@ -1,6 +1,6 @@
 # MeetKey Recorder
 
-![라즈베리파이 터치스크린에서 실행 중인 MeetKey Recorder](assets/meetkey-device.jpg)
+![3D 출력 케이스에 조립된 MeetKey Recorder](assets/meetkey-device.jpg)
 
 **MeetKey Recorder**는 라즈베리파이와 USB 컨퍼런스 마이크로 만든 회의 녹음/전사/요약 PoC입니다. 회의실에 놓인 작은 장치에서 녹음을 시작하고, 회의가 끝나면 휴대폰으로 QR을 스캔해 원본 음성, 전사문, 요약문을 바로 확인하는 흐름을 구현했습니다.
 
@@ -16,7 +16,7 @@
 | 접속 방식 | 라즈베리파이 핫스팟 + QR 기반 휴대폰 접속 |
 | 처리 방식 | 10분 단위 오디오 구간 전송, Whisper 전사, Gemma/Ollama 요약 |
 | 저장 정책 | 원본 음성, 전사문, 요약문은 라즈베리파이에 로컬 저장 |
-| 하드웨어 | Fusion 360 케이스 설계, Bambu Studio 슬라이싱, 3D 출력 완료 |
+| 하드웨어 | Fusion 360 케이스 설계, Bambu Studio 슬라이싱, 3D 출력/조립 완료 |
 | 현재 상태 | 실제 녹음, 저장, 전사, 요약, 다운로드까지 end-to-end 검증 완료 |
 
 ## 왜 만들었나
@@ -91,6 +91,8 @@ flowchart TB
 
 MeetKey는 책상 위에 그냥 부품을 올려두는 형태가 아니라, 회의실에 놓을 수 있는 작은 전용 장치처럼 보이도록 케이스까지 설계했습니다. 5인치 터치스크린을 전면에 비스듬히 배치하고, 라즈베리파이와 케이블이 뒤쪽으로 정리될 수 있는 구조를 목표로 했습니다.
 
+최종 조립에서는 마이크 받침부를 디스플레이 높이까지 올렸습니다. 디스플레이 프레임이 마이크로 들어오는 소리를 가리지 않도록 하기 위한 선택이며, 후면부는 마이크 높이 확보와 내부 배선 정리를 함께 고려한 형태로 설계했습니다.
+
 | Fusion 360 설계 | Bambu Studio 출력 준비 |
 | --- | --- |
 | ![Fusion 360에서 설계한 MeetKey 케이스](assets/meetkey-case-fusion.png) | ![Bambu Studio에서 슬라이싱한 MeetKey 케이스](assets/meetkey-case-slicer.png) |
@@ -157,7 +159,7 @@ sequenceDiagram
 | Gemma 요약 | 회의 개요, 핵심 논의, 액션 아이템 생성 |
 | 휴대폰 QR 접속 | 로컬 기록 페이지 접속 확인 |
 | 파일 다운로드 | 원본 음성, 전사문, 요약문 다운로드 지원 |
-| 케이스 설계/출력 | Fusion 360 설계와 Bambu Studio 슬라이싱, 3D 출력 완료 |
+| 케이스 설계/출력 | Fusion 360 설계와 Bambu Studio 슬라이싱, 3D 출력 및 전체 조립 완료 |
 | GitHub 관리 | 민감 설정과 녹음 파일 제외 후 private repo 관리 |
 
 ## 폴더 구조
