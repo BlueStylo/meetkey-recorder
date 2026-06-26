@@ -38,3 +38,6 @@ env/
 # OS/editor noise
 .idea/
 .vscode/
+
+# Internal planning doc — kept local, not published
+/000_INDEX.md
